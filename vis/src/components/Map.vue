@@ -35,23 +35,36 @@ for (let i = 0; i < combined.length; i++) {
   fdata[combined[i].zip][combined[i].date] = combined[i];
 }
 
-const fd = "March-18-2021";
-
-window.fd = fd;
 window.fdata = fdata;
 window.combined = combined;
 
-function getRaceColor(race, zip) {
-  const filtered = fdata[zip][fd];
+function getRaceColor(race, date, zip) {
+  const filtered = fdata[zip][date];
   const pop = `${race}Pop`;
   return filtered[race] / filtered[pop];
 }
 
-console.log(getRaceColor("White", "02128"));
-
 export default {
   name: "Map",
   components: { Button },
+  props: {
+    race: {
+      type: String,
+      default: "White",
+    },
+    date: {
+      type: String,
+      default: "April-1-2021",
+    },
+  },
+  watch: {
+    race() {
+      this.draw();
+    },
+    date() {
+      this.draw();
+    },
+  },
   data() {
     return {
       agitated: false,
@@ -69,16 +82,7 @@ export default {
       g = svg.select(".counties");
       g.selectAll("path:not([data-state='MA'])").remove();
 
-      g.selectAll("path").style("fill", function () {
-        const zip = this.getAttribute("data-zip");
-
-        if (fdata[zip] !== undefined && fdata[zip][fd] !== undefined) {
-          const d = getRaceColor("Black", zip);
-          return `rgba(255, 255, 0, ${d})`;
-        }
-        console.log(fdata[zip]);
-        return "black";
-      });
+      this.draw();
 
       // Set viewbox to be of whatever is left.
       const bbox = container.node().getBBox();
@@ -136,6 +140,23 @@ export default {
     reset() {
       this.agitated = false;
       svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+    },
+    draw() {
+      const rr = this.race;
+      const dd = this.date;
+      g.selectAll("path")
+        .transition()
+        .delay(50)
+        .style("fill", function () {
+          const zip = this.getAttribute("data-zip");
+
+          if (fdata[zip] !== undefined && fdata[zip][dd] !== undefined) {
+            const d = getRaceColor(rr, dd, zip);
+            return `rgba(255, 255, 0, ${d})`;
+          }
+          console.log(fdata[zip]);
+          return "black";
+        });
     },
   },
 };
