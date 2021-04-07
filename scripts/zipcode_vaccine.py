@@ -26,7 +26,7 @@ prefix = "https://www.mass.gov/doc/weekly-covid-19-municipality-vaccination-repo
 postfix = "/download"
 all_dfs = []
 
-f = open("race_population_vaccine.csv", "w")
+f = open("zipcode_vaccine.csv", "w")
 
 for d in dates:
     url = prefix + d.lower() + postfix
@@ -38,22 +38,27 @@ for d in dates:
             r.write(resp.content)
         #my_sheet = 'Race and ethnicity - muni.' # change it to your sheet name, you can find your sheet name at the bottom left of your excel file
         wb = load_workbook(fname)
-        ws = wb[wb.sheetnames[2]]
-        for row in ws.iter_rows(min_row=2, max_col=6):
+        ws = wb[wb.sheetnames[6]]
+        for row in ws.iter_rows(min_row=4, max_col=10):
             row_str = d
+            add_row = True
             for cell in row:
-                if str(cell.value) == 'County':
-                    row_str = 'Date'
-                row_str += ',' + str(cell.value) 
-            row_str = row_str.strip(',')
-            #print(row_str)    
-            row_str += '\n'
-            f.write(row_str)
-        # for row in ws.values:
-           # for value in row:
-             # print(value)
-    
-
-        #df = read_excel(fname, sheet_name = my_sheet, engine = 'openpyxl')
-        #dfs = read_excel(fname, sheet_name = None, engine = 'openpyxl')
+                if str(cell.value) == 'Unspecified':
+                    add_row = False
+                    break
+                row_str += ',' + str(cell.value).strip("/'") 
+            if add_row:
+                row_str = row_str.strip(',')
+                row_str += '\n'
+                f.write(row_str)
 f.close()
+
+
+def prepend_line(filename, line):
+    with open(filename, 'r+') as f:
+        content = f.read()
+        f.seek(0, 0)
+        f.write(line.rstrip('\r\n') + '\n' + content)
+
+column_labels = 'Date,ZIP,AI/AN,Asian,Black,Hispanic,Multi,NH/PI,Other,White,Unknown'
+prepend_line('zipcode_vaccine.csv', column_labels)
