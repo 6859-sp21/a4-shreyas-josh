@@ -4,7 +4,7 @@
     <div class="blurb">
       The US has vaccinated more people against COVID-19 than any country so
       far, but how equitable has the rollout been? Here we show the percent of
-      population to reveive at least a single dose by race.
+      population to receive at least a single dose by race.
     </div>
     <div class="map-container">
       <Map :race="race" :date="date"></Map>
