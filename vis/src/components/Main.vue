@@ -20,6 +20,24 @@
       <br />
       <vue-slider v-model="date" :data="dates" :marks="true" />
     </div>
+    <div class="sources">
+      Data Sources:
+      <a
+        href="https://data.cdc.gov/Vaccinations/COVID-19-Vaccine-Distribution-Allocations-by-Juris/saz5-9hgg"
+        >CDC</a
+      >,
+      <a
+        href="https://www.mass.gov/info-details/massachusetts-covid-19-vaccination-data-and-updates"
+        >MA Government</a
+      >,
+      <a
+        href="https://www.modernatx.com/covid19vaccine-eua/providers/vial-lookup"
+        >Moderna</a
+      >,
+      <a href="https://data.census.gov/cedsci/table%3Fq=ACSDT5Y2012.B02001"
+        >US Census</a
+      >
+    </div>
   </div>
 </template>
 <script>
@@ -48,5 +66,14 @@ export default {
 .blurb {
   margin-bottom: 4rem;
   color: #969696;
+}
+
+.sources {
+  margin-top: 5rem;
+  color: #969696;
+}
+
+.sources a {
+  color: #8e8ebd;
 }
 </style>
