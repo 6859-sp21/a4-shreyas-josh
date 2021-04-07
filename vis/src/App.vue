@@ -25,8 +25,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: "IBM Plex Sans";
-  background: rgba(20,20,20,1);
-  color: rgba(255,255,255,0.7);
+  background: rgba(20, 20, 20, 1);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .centered-container {

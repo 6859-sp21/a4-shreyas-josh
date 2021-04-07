@@ -1,15 +1,22 @@
 <template>
   <div class="main">
     <h1>Who is actually getting COVID vaccines in MA?</h1>
+    <div class="blurb">
+      The US has vaccinated more people against COVID-19 than any country so
+      far, but how equitable has the rollout been? Here we show the percent of
+      population to reveive at least a single dose by race.
+    </div>
     <div class="map-container">
       <Map :race="race" :date="date"></Map>
     </div>
     <div class="controls">
       <input type="radio" id="one" value="White" v-model="race" />
       <label for="one">White</label>
-      <br />
+      &nbsp;
       <input type="radio" id="two" value="Black" v-model="race" />
       <label for="two">Black</label>
+      &nbsp;
+      <br />
       <br />
       <vue-slider v-model="date" :data="dates" :marks="true" />
     </div>
@@ -37,3 +44,9 @@ export default {
   },
 };
 </script>
+<style scoped>
+.blurb {
+  margin-bottom: 4rem;
+  color: #969696;
+}
+</style>

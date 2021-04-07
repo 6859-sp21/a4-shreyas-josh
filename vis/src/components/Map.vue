@@ -1,5 +1,8 @@
 <template>
   <div class="map">
+    <div class="spinner-box" v-if="loading">
+      <Spinner theme="light" radius="50px"></Spinner>
+    </div>
     <div class="map-rel">
       <Button
         class="reset-button"
@@ -16,6 +19,7 @@
 </template>
 <script>
 import Button from "./Button";
+import Spinner from "./Spinner";
 // import MapSVG from '@/assets/uszipcodemap.svg';
 import * as d3 from "d3";
 import combined from "@/assets/combined.json";
@@ -46,7 +50,7 @@ function getRaceColor(race, date, zip) {
 
 export default {
   name: "Map",
-  components: { Button },
+  components: { Button, Spinner },
   props: {
     race: {
       type: String,
@@ -68,6 +72,7 @@ export default {
   data() {
     return {
       agitated: false,
+      loading: true,
     };
   },
   mounted() {
@@ -134,6 +139,7 @@ export default {
       zoom = d3.zoom().scaleExtent([1, 40]).on("zoom", zoomed);
 
       svg.call(zoom);
+      this.loading = false;
     });
   },
   methods: {
@@ -190,5 +196,13 @@ svg.map-svg path:hover {
   stroke-width: 0.3px;
   // transform: scale(1.2);
   // transform-origin: center;
+}
+
+.spinner-box {
+  display: flex;
+  width: 100%;
+  height: 26rem;
+  justify-content: center;
+  align-items: center;
 }
 </style>
