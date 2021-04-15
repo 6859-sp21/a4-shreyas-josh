@@ -6,6 +6,17 @@
       far, but how equitable has the rollout been? Here we show the percent of
       population to receive at least a single dose by race.
     </div>
+
+    <div id="color_code">
+      <span style="position: relative; bottom: 7%; left: -4%"> Percent of demographic with at least one dose </span>
+      <br />
+      <div>
+        <span class="ib gradient_labels" style="right: 2%;">0%</span>
+        <div class="gradient ib"></div>
+        <span class="ib gradient_labels" style="left: 2%;">100%</span>
+      </div>
+    </div>
+
     <div class="map-container">
       <Map :race="race" :date="date"></Map>
     </div>
@@ -66,6 +77,22 @@ export default {
 .blurb {
   margin-bottom: 4rem;
   color: #969696;
+}
+
+.ib {
+  display: inline-block;
+}
+
+.gradient_labels{
+  position: relative; 
+  bottom: 25%;
+}
+
+.gradient {
+  height: 25px;
+  width: 150px;
+  background-color: yellow; /* For browsers that do not support gradients */
+  background-image: linear-gradient(to right, black , yellow);
 }
 
 .sources {
