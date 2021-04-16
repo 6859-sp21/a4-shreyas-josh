@@ -3,6 +3,7 @@
     <div class="spinner-box" v-if="loading">
       <Spinner theme="light" radius="50px"></Spinner>
     </div>
+    <Tooltip :paused="tipPause" :visible="tipVisible" :data="tipData"></Tooltip>
     <div class="map-rel">
       <Button
         class="reset-button"
@@ -12,7 +13,6 @@
       >
         <font-awesome-icon :icon="['far', 'compass']" />
       </Button>
-      <!-- <MapSVG class="map-svg" v-once></MapSVG> -->
       <div class="svg-container" v-once></div>
     </div>
   </div>
@@ -20,6 +20,7 @@
 <script>
 import Button from "./Button";
 import Spinner from "./Spinner";
+import Tooltip from "./Tooltip";
 // import MapSVG from '@/assets/uszipcodemap.svg';
 import * as d3 from "d3";
 import combined from "@/assets/combined.json";
@@ -28,6 +29,10 @@ let svg;
 let g;
 let zoom;
 let container;
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 const fdata = {};
 
@@ -45,12 +50,23 @@ window.combined = combined;
 function getRaceColor(race, date, zip) {
   const filtered = fdata[zip][date];
   const pop = `${race}Pop`;
+
+  if (filtered[pop] < filtered[race]) {
+    return NaN;
+  }
+
   return filtered[race] / filtered[pop];
+}
+
+function getRacePop(race, date, zip) {
+  const filtered = fdata[zip][date];
+  const pop = `${race}Pop`;
+  return filtered[pop];
 }
 
 export default {
   name: "Map",
-  components: { Button, Spinner },
+  components: { Button, Spinner, Tooltip },
   props: {
     race: {
       type: String,
@@ -67,23 +83,34 @@ export default {
     },
     date() {
       this.draw();
+
+      if (this.tipVisible) this.updateTTNumbers();
     },
   },
   data() {
     return {
       agitated: false,
       loading: true,
+      tipVisible: false,
+      tipPause: false,
+      tipData: {
+        name: "",
+        zip: "",
+      }
     };
   },
   mounted() {
     d3.xml(require("@/assets/uszipcodemap.svg")).then((data) => {
       d3.select(".svg-container").node().append(data.documentElement);
 
+      let currentZoomLevel = 1;
+
       svg = d3.select("svg.map-svg");
       container = svg.select("g");
       container
         .attr("id", "container")
-        .attr("transform", "translate(0,0)scale(1,1)");
+        .attr("transform", "translate(0,0)scale(1,1)")
+        .attr("stroke-width", 0.05);
       g = svg.select(".counties");
       g.selectAll("path:not([data-state='MA'])").remove();
 
@@ -126,13 +153,25 @@ export default {
           .duration(750)
           .call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
 
+        this.tipPause = true;
+        this.updateTT(event);
+
         event.stopPropagation();
       };
 
+      document.addEventListener("mousemove", this.mm);
+
       g.selectAll("path").on("click", clicked);
+      g.selectAll("path").on("mouseover", function () {
+        d3.select(this).attr("stroke-width", 0.3 / currentZoomLevel);
+      }).on("mouseout", function () {
+        d3.select(this).attr("stroke-width", 0.05 / currentZoomLevel);
+      })
 
       const zoomed = ({ transform }) => {
+        currentZoomLevel = transform.k;
         container.attr("transform", transform);
+        g.selectAll("path").attr("stroke-width", 0.05 / transform.k);
         this.agitated = !(transform === d3.zoomIdentity);
       };
 
@@ -142,9 +181,55 @@ export default {
       this.loading = false;
     });
   },
+  destroyed() {
+    document.removeEventListener("mousemove", this.mm);
+  },
   methods: {
+    mm(e) {
+      if (this.tipPause) return;
+      this.updateTT(e);
+    },
+    updateTT(e) {
+      const tag = e.target.tagName;
+      if (tag === "path") {
+        const elem = d3.select(e.target);
+
+        this.tipVisible = true;
+        this.tipData = {
+          name: elem.attr("data-name").toProperCase(),
+          zip: elem.attr("data-zip"),
+        }
+        this.updateTTNumbers();
+      } else {
+        this.tipVisible = false;
+      }
+    },
+    updateTTNumbers() {
+      const dd = this.date;
+      const zip = this.tipData.zip;
+
+      const races = [];
+
+      for (let r of ["Black", "White"]) {
+        const pop = getRacePop(r, dd, zip);
+        const p = getRaceColor(r, dd, zip);
+        races.push({
+          name: r.toProperCase(),
+          val: (isNaN(p)) ? "-" : `${(p * 100).toFixed(2)}%`,
+          pop: `${(numberWithCommas(pop))}`,
+        })
+      }
+
+      this.tipData = {
+        name: this.tipData.name,
+        zip: zip,
+        races: races,
+      }
+    },
     reset() {
       this.agitated = false;
+      this.tipVisible = false;
+      this.tipPause = false;
       svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
     },
     draw() {
@@ -152,13 +237,18 @@ export default {
       const dd = this.date;
       g.selectAll("path")
         .transition()
-        .delay(50)
+        .delay(10)
         .style("fill", function () {
           const zip = this.getAttribute("data-zip");
 
           if (fdata[zip] !== undefined && fdata[zip][dd] !== undefined) {
             const d = getRaceColor(rr, dd, zip);
-            return `rgba(255, 255, 0, ${d})`;
+
+            if (!isNaN(d)) {
+              return `rgba(255, 255, 0, ${d})`;
+            } else {
+              return "url(#diagonalHatch)";
+            }
           }
           console.log(fdata[zip]);
           return "black";
@@ -181,11 +271,12 @@ svg.map-svg {
   top: 2rem;
   right: 2rem;
   font-size: 1.2em;
+  z-index: 2000;
 }
 
 svg.map-svg path {
   stroke: rgb(255 255 255 / 47%);
-  stroke-width: 0.04px;
+  // stroke-width: 0.04px;
   fill: black;
   cursor: pointer;
   // transform-box: fill-box;
@@ -193,7 +284,7 @@ svg.map-svg path {
 
 svg.map-svg path:hover {
   fill: rgb(11, 2, 34);
-  stroke-width: 0.3px;
+  // stroke-width: 1%;
   // transform: scale(1.2);
   // transform-origin: center;
 }
