@@ -31,6 +31,7 @@ f = open("zipcode_vaccine.csv", "w")
 for d in dates:
     url = prefix + d.lower() + postfix
     resp = requests.get(url)
+    print(resp.status_code)
     content_type = resp.headers['Content-Type']
     if content_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
         fname = d + '.xlsx'

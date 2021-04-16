@@ -61,13 +61,11 @@ export default {
   components: { Map, VueSlider },
   data() {
     return {
-      race: "White",
-      date: "April-1-2021",
+      race: "Black",
+      date: "April-15-2021",
       dates: [
-        "March-11-2021",
-        "March-18-2021",
-        "March-25-2021",
-        "April-1-2021",
+        'March-11-2021', 'March-18-2021', 'March-25-2021', 'April-1-2021',
+        'April-8-2021', 'April-15-2021',
       ],
     };
   },
