@@ -17,6 +17,11 @@
       </div>
     </div>
 
+    <div class="no-data">
+      <div class="hatched-box crosshatch"></div>
+      <div class="no-data-label"> = No Data</div>
+    </div>
+
     <div class="map-container">
       <Map :race="race" :date="date"></Map>
     </div>
@@ -94,8 +99,43 @@ export default {
   color: #969696;
 }
 
+input {
+  cursor: pointer;
+}
+
+label {
+  cursor: pointer;
+}
+
 .sources a {
   color: #8e8ebd;
+}
+
+.no-data {
+  display: flex;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+
+.hatched-box {
+  width: 25px;
+  height: 25px;
+  margin-right: 0.4rem;
+}
+
+.crosshatch {
+   color: white;
+   background-image: linear-gradient(
+      320deg, 
+      rgba(255,255,255,0.2) 25%, 
+      transparent 25%, 
+      transparent 50%, 
+      rgba(255,255,255,0.2) 50%, 
+      rgba(255,255,255,0.2) 75%, 
+      transparent 75%, 
+      transparent
+      );
+   background-size: 10px 10px;
 }
 
 .bar-container {

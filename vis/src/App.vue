@@ -32,6 +32,6 @@ body {
 .centered-container {
   max-width: 50rem;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 1rem 1rem;
 }
 </style>
